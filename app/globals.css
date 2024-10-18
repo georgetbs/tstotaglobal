@@ -77,13 +77,8 @@ body {
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Добавьте стили для использования шрифтов */
 body {
-  font-family: 'Roboto', sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto', serif;
+  font-family: 'Inter', sans-serif;
 }

@@ -12,7 +12,7 @@ const geistMono = localFont({
 
 export const generateMetadata = ({ params: { lang } }: { params: { lang: string } }) => {
 	return {
-		title: `George Kvirkvelia ${lang.toUpperCase()}`,
+		title: `Next.js Special Guides by george_tbs}`,
 		description: "Made by georgetbs",
 	};
 }

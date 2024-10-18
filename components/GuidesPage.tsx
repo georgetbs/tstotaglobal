@@ -1,133 +1,168 @@
-// components/GuidesPage.tsx
-
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import React, { useEffect, useState } from 'react'
+import { serialize } from 'next-mdx-remote/serialize'
+import { MDXRemoteSerializeResult } from 'next-mdx-remote'
+import dynamic from 'next/dynamic'
+import ArticleNavigation from '@/components/ArticleNavigation'
+import TableOfContents from '@/components/TableOfContents'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { Toaster } from '@/components/ui/toaster'
-import { Search, Plus } from 'lucide-react'
-import initTranslations from '@/i18n'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Article, NavigationItem } from '@/types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { Menu } from 'lucide-react'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
-interface Article {
+const ClientSideMDX = dynamic(() => import('@/components/ClientSideMDX'), { ssr: false })
+
+interface Translations {
+  guides: string
+  chooseArticle: string
+  allRightsReserved: string
+  followOnX: string
+  about: string
+  privacy: string
+}
+
+interface Heading {
   id: string
-  title: string
-  description: string
-  category: string
-  createdAt: string
+  text: string
+  level: number
 }
 
 interface GuidesPageProps {
-  articles: Article[]
+  navigationItems: NavigationItem[]
   lang: string
+  translations: Translations
+  defaultArticle?: Article
 }
 
-const GuidesPage: React.FC<GuidesPageProps> = ({ articles, lang }) => {
-  const [t, setT] = useState<(key: string) => string>(() => (key: string) => key)
-  const [filteredArticles, setFilteredArticles] = useState<Article[]>(articles)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+export default function GuidesPage({
+  navigationItems,
+  lang,
+  translations,
+  defaultArticle,
+}: GuidesPageProps) {
+  const t = (key: keyof Translations) => translations[key]
+
+  const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(null)
+  const [headings, setHeadings] = useState<Heading[]>([])
+  const [readingTime, setReadingTime] = useState('')
 
   useEffect(() => {
-    const loadTranslations = async () => {
-      const { t } = await initTranslations(lang, ['common'])
-      setT(() => t)
+    const processArticle = async () => {
+      if (defaultArticle) {
+        const mdx = await serialize(defaultArticle.content)
+        setMdxSource(mdx)
+
+        const getHeadings = async (markdownContent: string): Promise<Heading[]> => {
+          const { remark } = await import('remark')
+          const remarkParse = (await import('remark-parse')).default
+          const { visit } = await import('unist-util-visit')
+
+          const headings: Heading[] = []
+
+          const tree = remark().use(remarkParse).parse(markdownContent)
+
+          visit(tree, 'heading', (node: any) => {
+            const text = node.children
+              .filter((child: any) => child.type === 'text' || child.type === 'inlineCode')
+              .map((child: any) => child.value)
+              .join('')
+            const id = text.toLowerCase().replace(/\s+/g, '-')
+            headings.push({ id, text, level: node.depth })
+          })
+
+          return headings
+        }
+
+        const extractedHeadings = await getHeadings(defaultArticle.content)
+        setHeadings(extractedHeadings)
+
+        const wordsPerMinute = 200
+        const words = defaultArticle.content.split(/\s+/).length
+        const minutes = Math.ceil(words / wordsPerMinute)
+        setReadingTime(`${minutes} min read`)
+      }
     }
-    loadTranslations()
-  }, [lang])
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value
-    setSearchQuery(query)
-    filterArticles(query, selectedCategory)
-  }
-
-  const filterArticles = (query: string, category: string) => {
-    const filtered = articles.filter(article => {
-      const matchesSearch = article.title.toLowerCase().includes(query.toLowerCase()) ||
-                            article.description.toLowerCase().includes(query.toLowerCase())
-      const matchesCategory = category === 'all' || article.category === category
-      return matchesSearch && matchesCategory
-    })
-    setFilteredArticles(filtered)
-  }
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category)
-    filterArticles(searchQuery, category)
-  }
-
-  const categories = Array.from(new Set(articles.map(article => article.category)))
+    processArticle()
+  }, [defaultArticle])
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Toaster />
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <Link href="/" className="font-bold text-xl">
-            {t('portalName')}
-          </Link>
-        </div>
-      </header>
+      <Header lang={lang} />
 
-      <main className="flex-grow container mx-auto p-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">{t('guides')}</h1>
-          <Button asChild>
-            <Link href={`/${lang}/guides/create`}>
-              <Plus className="mr-2 h-4 w-4" /> {t('createGuide')}
-            </Link>
-          </Button>
-        </div>
+      <div className="flex-1 overflow-hidden">
+        <div className="mx-auto max-w-7xl flex">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="fixed top-4 left-4 z-50 lg:hidden">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <ArticleNavigation navigationItems={navigationItems} lang={lang} />
+            </SheetContent>
+          </Sheet>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-grow">
-            <Input
-              type="search"
-              placeholder={t('searchGuides')}
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="hidden lg:block w-80 flex-shrink-0">
+            <ArticleNavigation navigationItems={navigationItems} lang={lang} />
           </div>
-          <Select value={selectedCategory} onValueChange={(value) => handleCategoryChange(value)}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder={t('selectCategory')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allCategories')}</SelectItem>
-              {categories.map(category => (
-                <SelectItem key={category} value={category}>
-                  {t(category)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
-          {filteredArticles.map((article) => (
-            <Link href={`/${lang}/guides/${article.id}`} key={article.id}>
-              <div className="p-4 border rounded-lg hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-                <div className="flex flex-col h-full">
-                  <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                  <p className="text-sm text-gray-500 mb-2">{article.description}</p>
-                  <p className="text-xs text-gray-400 mb-2">{t('Category')}: {article.category}</p>
-                  <p className="text-xs text-gray-400 mb-4">{t('Created at')}: {new Date(article.createdAt).toLocaleDateString()}</p>
-                  <Button className="mt-auto w-full" variant="ghost">
-                    {t('readMore')}
-                  </Button>
-                </div>
+          <main className="flex-grow overflow-hidden flex justify-center">
+            <ScrollArea className="h-[calc(100vh-4rem)] w-full">
+              <div className="py-8 px-4 lg:px-8 max-w-3xl mx-auto">
+                <Card className="shadow-none border-none">
+                  <CardContent className="p-0">
+                    {defaultArticle && mdxSource ? (
+                      <article>
+                        <CardHeader className="px-0">
+                          <CardTitle className="text-3xl lg:text-4xl font-bold">{defaultArticle.title}</CardTitle>
+                          <p className="text-muted-foreground mt-2">{defaultArticle.description}</p>
+                          <div className="text-sm text-muted-foreground mt-4 flex items-center space-x-4">
+                            <span>
+                              Created on: {new Date(defaultArticle.createdAt).toLocaleDateString()}
+                            </span>
+                            <span>•</span>
+                            <span>{readingTime}</span>
+                          </div>
+                        </CardHeader>
+                        <div className="mt-8">
+                          <ClientSideMDX source={mdxSource} />
+                        </div>
+                      </article>
+                    ) : (
+                      <article>
+                        <CardHeader className="px-0">
+                          <CardTitle className="text-3xl lg:text-4xl font-bold">{t('guides')}</CardTitle>
+                        </CardHeader>
+                        <p className="mt-4">{t('chooseArticle')}</p>
+                        <div className="mt-6 space-y-4">
+                          <Skeleton className="h-4 w-[250px]" />
+                          <Skeleton className="h-4 w-[200px]" />
+                          <Skeleton className="h-4 w-[300px]" />
+                        </div>
+                      </article>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
-            </Link>
-          ))}
+            </ScrollArea>
+          </main>
+
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <TableOfContents headings={headings} />
+          </div>
         </div>
-      </main>
+      </div>
+
+      <Footer translations={translations} lang={lang} />
     </div>
   )
 }
-
-export default GuidesPage
