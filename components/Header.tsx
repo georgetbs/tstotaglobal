@@ -1,65 +1,75 @@
-// components/Header.tsx
 'use client';
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Globe } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface HeaderProps {
   lang: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ lang }) => {
-  const pathname = usePathname();
-
-  // Function to replace the language code in the pathname
-  const getPathWithNewLang = (newLang: string) => {
-    const segments = pathname?.split('/') || [];
-    if (segments.length > 1) {
-      segments[1] = newLang;
-      return segments.join('/') || '/';
-    }
-    return `/${newLang}`;
-  };
-
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white">
-      <div className="container flex items-center justify-between h-16 px-6 mx-auto">
-        <Link href={`/${lang}`} className="text-2xl font-bold tracking-tight">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
+      <div className="container flex items-center justify-between h-16 px-4 mx-auto">
+        {/* Logo and site name for desktop */}
+        <Link
+          href={`/${lang}`}
+          className="hidden md:block text-xl md:text-2xl font-bold tracking-tight text-foreground"
+        >
           george_tbs guides
         </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Globe className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={getPathWithNewLang('ka')}>
-                <span className="mr-2">🇬🇪</span> ქართული
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={getPathWithNewLang('en')}>
-                <span className="mr-2">🇬🇧</span> English
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={getPathWithNewLang('ru')}>
-                <span className="mr-2">🇷🇺</span> Русский
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+        {/* Right side of the header */}
+        <div className="flex items-center space-x-2 justify-end flex-1">
+          {/* Switches visible only on desktop */}
+          <div className="hidden md:flex items-center space-x-2">
+            <LanguageSwitcher lang={lang} />
+            <ThemeToggle />
+          </div>
+
+          {/* Settings button for mobile devices */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Open settings</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetHeader>
+                <VisuallyHidden.Root>
+                  <SheetTitle>Settings</SheetTitle>
+                  <SheetDescription>Manage your preferences</SheetDescription>
+                </VisuallyHidden.Root>
+              </SheetHeader>
+              <nav className="flex flex-col space-y-4 mt-4">
+                {/* Site name inside Sheet for mobile */}
+                <Link
+                  href={`/${lang}`}
+                  className="md:hidden text-xl font-bold tracking-tight text-foreground"
+                >
+                  george_tbs guides
+                </Link>
+                {/* Switches inside Sheet */}
+                <LanguageSwitcher lang={lang} />
+                <ThemeToggle />
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

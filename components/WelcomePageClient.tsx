@@ -1,4 +1,3 @@
-// components/WelcomePageClient.tsx
 'use client';
 
 import React from 'react';
@@ -28,18 +27,16 @@ const WelcomePageClient: React.FC<WelcomePageClientProps> = ({ translations, lan
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-600 to-indigo-900 text-white">
-      {/* Header */}
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Header lang={lang} />
 
-      {/* Main content */}
-      <main className="flex-grow flex flex-col items-center justify-center text-center px-4">
+      <main className="flex-grow flex flex-col items-center justify-center text-center px-4 bg-gradient-to-b from-primary/20 to-background">
         <motion.h1
           variants={fadeInUp}
           initial="hidden"
           animate="visible"
           transition={{ duration: 0.5 }}
-          className="text-5xl md:text-6xl font-extrabold mb-6"
+          className="text-5xl md:text-6xl font-extrabold mb-6 text-foreground"
         >
           {translations.welcomeMessage}
         </motion.h1>
@@ -48,7 +45,7 @@ const WelcomePageClient: React.FC<WelcomePageClientProps> = ({ translations, lan
           initial="hidden"
           animate="visible"
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-lg md:text-xl max-w-2xl mb-8"
+          className="text-lg md:text-xl max-w-2xl mb-8 text-muted-foreground"
         >
           {translations.welcomeDescription}
         </motion.p>
@@ -58,13 +55,12 @@ const WelcomePageClient: React.FC<WelcomePageClientProps> = ({ translations, lan
           animate="visible"
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Button asChild className="bg-white text-indigo-600 font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-100 transition">
+          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 transition">
             <Link href={`/${lang}/guides`}>{translations.exploreGuides}</Link>
           </Button>
         </motion.div>
       </main>
 
-      {/* Footer */}
       <Footer translations={translations} lang={lang} />
     </div>
   );

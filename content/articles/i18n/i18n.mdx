@@ -1,0 +1,47 @@
+---
+title: 'Internationalization (i18n)'
+description: 'Learn how to set up internationalization in your Next.js project.'
+category: 'i18n'
+createdAt: '2024-10-19'
+---
+
+# Introduction to Internationalization (i18n)
+
+Internationalization, or **i18n**, is the process of preparing your application to support multiple languages and regions. In this guide, we'll walk you through how to add i18n to your Next.js project using built-in tools and best practices.
+
+## Why Internationalize?
+
+With a global audience, it's essential to provide users with content in their native language. Next.js simplifies this process with its powerful i18n routing feature.
+
+## Key Features of Next.js i18n
+
+- Built-in support for locale-based routing
+- Automatic language detection
+- Easy integration with popular libraries like **next-translate** and **react-intl**
+
+## Setting Up i18n in Next.js
+
+To get started, add the i18n configuration in `next.config.js`:
+
+```js
+module.exports = {
+  i18n: {
+    locales: ['en', 'es', 'fr'], // Add your supported languages here
+    defaultLocale: 'en',
+  },
+};
+```
+
+This configuration tells Next.js which languages your app supports and what the default language should be.
+
+## Language-Specific Pages
+
+With i18n enabled, your URLs will include locale prefixes (e.g., `/es/about` for the Spanish version of the `/about` page). This ensures users are directed to the correct version of your content.
+
+## Further Learning
+
+For more advanced use-cases, you might want to explore third-party libraries like **next-i18next** for managing translations and language files more effectively.
+
+---
+
+*Last updated on {new Date().toLocaleDateString()}*

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import ReactMde from 'react-mde';
 import 'react-mde/lib/styles/css/react-mde-all.css';
-import { Plus, Image as ImageIcon, Save } from 'lucide-react';
+import { Plus, Image as ImageIcon, Save, Moon, Sun } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -25,8 +25,37 @@ const CreateArticlePage: React.FC = () => {
   const [category, setCategory] = useState('');
   const [sections, setSections] = useState([{ title: '', content: '' }]);
   const [selectedTab, setSelectedTab] = useState<'write' | 'preview'>('write');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for user's preferred color scheme
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+
+    // Add listener for changes to color scheme preference
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Apply theme to body
+    document.body.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,35 +123,40 @@ const CreateArticlePage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Create New Article</h1>
+    <div className={`container mx-auto p-4 ${theme}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-foreground">Create New Article</h1>
+        <Button onClick={toggleTheme} variant="outline" size="icon" className="bg-background text-foreground">
+          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+        </Button>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           type="text"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full"
+          className="w-full bg-background text-foreground"
         />
         <Input
           type="text"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full"
+          className="w-full bg-background text-foreground"
         />
         <Input
           type="text"
           placeholder="Author"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          className="w-full"
+          className="w-full bg-background text-foreground"
         />
         <Select onValueChange={setCategory}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full bg-background text-foreground">
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background">
             <SelectItem value="i18n">i18n</SelectItem>
             <SelectItem value="icons">Icons</SelectItem>
             <SelectItem value="supabase">Supabase</SelectItem>
@@ -147,6 +181,7 @@ const CreateArticlePage: React.FC = () => {
               value={section.title}
               onChange={(e) => handleSectionChange(index, 'title', e.target.value)}
               placeholder={`Section Title ${index + 1}`}
+              className="bg-background text-foreground"
             />
             <ReactMde
               value={section.content}
@@ -154,8 +189,20 @@ const CreateArticlePage: React.FC = () => {
               selectedTab={selectedTab}
               onTabChange={setSelectedTab}
               generateMarkdownPreview={(markdown) =>
-                Promise.resolve(<ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>)
+                Promise.resolve(
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`}
+                  >
+                    {markdown}
+                  </ReactMarkdown>
+                )
               }
+              classes={{
+                reactMde: `${theme === 'dark' ? 'react-mde-dark' : ''}`,
+                textArea: 'bg-background text-foreground',
+                preview: 'bg-background text-foreground'
+              }}
             />
           </div>
         ))}
@@ -185,12 +232,12 @@ const CreateArticlePage: React.FC = () => {
           </Button>
         </div>
       </form>
-      <div className="prose prose-lg mt-8">
-        <h2 className="text-2xl font-bold mb-2">Preview</h2>
+      <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} mt-8 max-w-none`}>
+        <h2 className="text-2xl font-bold mb-2 text-foreground">Preview</h2>
         {sections.map((section, index) => (
           <div key={index} className="mb-4">
-            <h3 className="text-xl font-semibold">{section.title}</h3>
-            <ReactMarkdown className="prose" remarkPlugins={[remarkGfm]}>
+            <h3 className="text-xl font-semibold text-foreground">{section.title}</h3>
+            <ReactMarkdown className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`} remarkPlugins={[remarkGfm]}>
               {section.content}
             </ReactMarkdown>
           </div>
