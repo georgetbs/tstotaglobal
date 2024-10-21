@@ -14,18 +14,32 @@ import {
 
 interface LanguageSwitcherProps {
   lang: string;
+  defaultLang: string; // Язык по умолчанию, который не отображается в URL
 }
 
-export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ lang }) => {
+export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ lang, defaultLang }) => {
   const pathname = usePathname();
 
   const getPathWithNewLang = (newLang: string) => {
-    const segments = pathname?.split('/') || [];
-    if (segments.length > 1) {
-      segments[1] = newLang;
-      return segments.join('/') || '/';
+    // Разбиваем путь на сегменты
+    const segments = pathname?.split('/').filter(Boolean) || [];
+    
+    // Если новый язык — язык по умолчанию, удаляем языковой сегмент
+    if (newLang === defaultLang) {
+      if (segments[0] === defaultLang) {
+        segments.shift(); // Убираем первый сегмент, если это язык по умолчанию
+      }
+    } else {
+      // Если это не язык по умолчанию, заменяем/добавляем языковой сегмент
+      if (segments[0] === defaultLang || segments[0]?.length === 2) {
+        segments[0] = newLang; // Заменяем существующий языковой сегмент
+      } else {
+        segments.unshift(newLang); // Добавляем языковой сегмент
+      }
     }
-    return `/${newLang}`;
+
+    // Восстанавливаем путь
+    return '/' + segments.join('/');
   };
 
   return (

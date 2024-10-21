@@ -30,7 +30,7 @@ interface PageProps {
     lang: string;
     slug: string;
   };
-  isDefault?: boolean;
+
 }
 
 interface Heading {
@@ -48,10 +48,10 @@ interface Translations {
 
 export default async function ArticlePage({
   params: { lang, slug },
-  isDefault = false,
+  
 }: PageProps) {
-  const article = await getArticleBySlug(slug);
-  const navigationItems = await getNavigationItems();
+  const article = getArticleBySlug(slug);
+  const navigationItems = getNavigationItems();
 
   if (!article) {
     notFound();

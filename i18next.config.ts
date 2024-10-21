@@ -2,7 +2,7 @@ const i18NextConfig = {
     debug: process.env.NODE_ENV === "development",
     i18n: {
         locales: ["en", "ka", "ru"],
-        defaultLocale: "ka"
+        defaultLocale: "en"
     },
     fallbackNS: "common",
     defaultNS: "common",
