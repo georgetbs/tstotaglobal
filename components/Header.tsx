@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ lang }) => {
         <div className="flex items-center space-x-2 justify-end flex-1">
           {/* Switches visible only on desktop */}
           <div className="hidden md:flex items-center space-x-2">
-            <LanguageSwitcher lang={lang} />
+            <LanguageSwitcher lang={lang} defaultLang=''/>
             <ThemeToggle />
           </div>
 
@@ -64,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({ lang }) => {
                   george_tbs guides
                 </Link>
                 {/* Switches inside Sheet */}
-                <LanguageSwitcher lang={lang} />
+                <LanguageSwitcher lang={lang} defaultLang='' />
                 <ThemeToggle />
               </nav>
             </SheetContent>
