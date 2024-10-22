@@ -20,7 +20,7 @@ interface ArticleNavigationProps {
 
 const categoryOrder = [
   'Introduction',
-  'Next.js',
+  'Next.js | App Router',
   'Tailwind CSS and Global Styling',
   'i18n',
   'AI Models',

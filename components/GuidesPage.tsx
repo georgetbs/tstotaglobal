@@ -99,7 +99,7 @@ export default function GuidesPage({
   }, [defaultArticle]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className=" min-h-screen max-w-screen bg-background text-foreground">
       <Header lang={lang} />
 
       <div className="mx-auto max-w-7xl flex relative">
@@ -121,7 +121,7 @@ export default function GuidesPage({
             <ArticleNavigation navigationItems={navigationItems} lang={lang} />
           </SheetContent>
         </Sheet>
-
+        </div>
         <div className="hidden lg:block w-80 flex-shrink-0 sticky top-16 h-screen overflow-y-auto">
           <ArticleNavigation navigationItems={navigationItems} lang={lang} />
         </div>
@@ -175,7 +175,7 @@ export default function GuidesPage({
         <div className="hidden lg:block w-72 flex-shrink-0 sticky top-16 h-screen overflow-y-auto">
           <TableOfContents headings={headings} />
         </div>
-      </div>
+     
 
       <Footer translations={translations} lang={lang} />
     </div>
