@@ -22,44 +22,59 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
   useEffect(() => {
     if (!headings?.length) return
 
-    // Add scroll-margin-top to all heading elements
     const headingElements = headings
       .filter((heading) => heading.level === 2 || heading.level === 3)
       .map((heading) => document.getElementById(heading.id))
       .filter((element): element is HTMLElement => element !== null)
 
-    // Add scroll margin to account for sticky header
     headingElements.forEach((element) => {
-      element.style.scrollMarginTop = '5rem' // Adjust this value based on your header height + desired padding
+      element.style.scrollMarginTop = '5rem'
     })
 
-    // Create an IntersectionObserver for each heading
-    const callback: IntersectionObserverCallback = (entries) => {
-      const visibleHeadings = entries
-        .filter((entry) => entry.isIntersecting)
-        .map((entry) => entry.target)
-        .sort((a, b) => {
-          const aTop = a.getBoundingClientRect().top
-          const bTop = b.getBoundingClientRect().top
-          return aTop - bTop
-        })
+    // Функция определения активного заголовка
+    const determineActiveHeading = () => {
+      const HEADER_OFFSET = 100 // Отступ для учета sticky header
 
-      if (visibleHeadings.length > 0) {
-        setActiveId(visibleHeadings[0].id)
+      // Получаем все позиции заголовков
+      const headingPositions = headingElements.map(element => {
+        const { top } = element.getBoundingClientRect()
+        return {
+          id: element.id,
+          top: top
+        }
+      })
+
+      // Находим последний заголовок, который находится выше или на уровне нашего отступа
+      const currentHeading = headingPositions
+        .filter(heading => heading.top <= HEADER_OFFSET)
+        .slice(-1)[0]
+      
+      if (currentHeading) {
+        setActiveId(currentHeading.id)
+      } else if (headingPositions.length > 0) {
+        // Если мы в самом начале и все заголовки ниже - берем первый
+        setActiveId(headingPositions[0].id)
       }
     }
 
-    const observer = new IntersectionObserver(callback, {
-      // Adjust rootMargin to account for sticky header
-      rootMargin: '-80px 0px -40% 0px',
-      threshold: [0, 1]
-    })
+    // Вызываем функцию при скролле с небольшим throttle
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          determineActiveHeading()
+          ticking = false
+        })
+        ticking = true
+      }
+    }
 
-    headingElements.forEach((element) => observer.observe(element))
+    window.addEventListener('scroll', onScroll)
+    // Определяем начальный активный заголовок
+    determineActiveHeading()
 
     return () => {
-      observer.disconnect()
-      // Clean up scroll margin styles
+      window.removeEventListener('scroll', onScroll)
       headingElements.forEach((element) => {
         element.style.scrollMarginTop = ''
       })
@@ -94,7 +109,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
                             e.preventDefault()
                             const element = document.getElementById(heading.id)
                             if (element) {
-                              const headerOffset = 80 // Adjust this value based on your header height
+                              const headerOffset = 80
                               const elementPosition = element.getBoundingClientRect().top
                               const offsetPosition = elementPosition + window.pageYOffset - headerOffset
 
@@ -122,5 +137,3 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
     </aside>
   )
 }
-
-/* Не забудь пофиксить что если два элемента видны, то надо первый делать активным*/

@@ -22,15 +22,25 @@ export default function ClientSideMDX({ source }: ClientSideMDXProps) {
                     prose-ol:text-gray-800 dark:prose-ol:text-gray-300
                     prose-ul:text-gray-800 dark:prose-ul:text-gray-300
                     prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-400
-                    prose-blockquote:border-primary dark:prose-blockquote:border-gray-700">
+                    prose-blockquote:border-primary dark:prose-blockquote:border-gray-700
+                    max-w-full
+                    prose-pre:overflow-x-auto
+                    prose-pre:max-w-full
+                    prose-pre:whitespace-pre-wrap
+                    prose-pre:break-words">
       <MDXRemote
         {...source}
         components={{
           img: ({ src, alt }) => (
             <Zoom>
-              {/* Убедитесь, что изображения всегда имеют alt-текст */}
               <img src={src} alt={alt} className="cursor-zoom-in dark:brightness-90 dark:contrast-125" />
             </Zoom>
+          ),
+          pre: ({ children }) => (
+            <pre className="overflow-x-auto p-4 rounded-lg">{children}</pre>
+          ),
+          code: ({ children }) => (
+            <code className="break-words whitespace-pre-wrap">{children}</code>
           ),
           h2: ({ children }) => {
             const id = String(children).toLowerCase().replace(/\s+/g, '-');
