@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface ArticleNavigationProps {
   navigationItems: NavigationItem[];
@@ -21,33 +20,42 @@ interface ArticleNavigationProps {
 
 const categoryOrder = [
   'Introduction',
+  'Next.js',
+  'Tailwind CSS and Global Styling',
   'i18n',
-  'Icons',
-  'Supabase',
-  'Authentication',
-  'Routing',
-  'API Routes',
-  'Static Generation',
-  'Server-Side Rendering',
-  'Dynamic Import',
-  'Middleware',
-  'Performance Optimization',
-  'Deployment',
-  'Testing',
-  'TypeScript',
-  'Tailwind CSS and Styling',
-  'Debugging',
+  'AI Models',
+  'shadcn',
+  'Markdown',
+  'Deploy on Vercel',
+  'Examples of code'
 ];
 
 const sortCategories = (categories: NavigationItem[]): NavigationItem[] => {
-  return categories.sort((a, b) => {
+  return [...categories].sort((a, b) => {
     const indexA = categoryOrder.indexOf(a.name);
     const indexB = categoryOrder.indexOf(b.name);
-    if (indexA === -1 && indexB === -1) return a.name.localeCompare(b.name);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
+    
+    // Если обе категории есть в массиве categoryOrder
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+    
+    // Если только одна из категорий есть в массиве categoryOrder
+    if (indexA !== -1) return -1; // a идет первой
+    if (indexB !== -1) return 1;  // b идет первой
+    
+    // Если обеих категорий нет в массиве categoryOrder, 
+    // оставляем их в исходном порядке
+    return 0;
   });
+};
+
+const isCategoryArticle = (item: NavigationItem): boolean => {
+  if (!item.children) return false;
+  return item.children.some(child => 
+    child.type === 'article' && 
+    child.slug === item.slug
+  );
 };
 
 export default function ArticleNavigation({ navigationItems, lang }: ArticleNavigationProps) {
@@ -55,14 +63,15 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
   const sortedNavigationItems = sortCategories(navigationItems);
 
   const renderNavigation = (items: NavigationItem[], isSubcategory = false) => {
-    if (!items || items.length === 0) return null;
+    if (!items) return null;
 
     return (
       <ul className={cn('space-y-1', isSubcategory && 'ml-4')}>
         {items.map((item) => {
           const isActive = item.slug ? pathname === `/${lang}/guides/${item.slug}` : false;
+          const isArticleCategory = isCategoryArticle(item);
 
-          if (item.type === 'category' && item.children && item.children.length > 0) {
+          if (item.type === 'category') {
             if (isSubcategory) {
               return (
                 <Accordion type="single" collapsible key={item.name}>
@@ -73,9 +82,20 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
                         isActive ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
                       )}
                     >
-                      {item.slug ? <Link href={`/${lang}/guides/${item.slug}`}>{item.name}</Link> : item.name}
+                      {isArticleCategory || item.slug ? (
+                        <Link href={`/${lang}/guides/${item.slug}`}>{item.name}</Link>
+                      ) : (
+                        item.name
+                      )}
                     </AccordionTrigger>
-                    <AccordionContent>{renderNavigation(item.children, true)}</AccordionContent>
+                    <AccordionContent>
+                      {item.children && renderNavigation(
+                        item.children.filter(child => 
+                          !(child.type === 'article' && child.slug === item.slug)
+                        ), 
+                        true
+                      )}
+                    </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               );
@@ -88,33 +108,21 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
                       isActive ? 'text-primary' : 'text-foreground hover:text-primary'
                     )}
                   >
-                    {item.slug ? (
+                    {isArticleCategory || item.slug ? (
                       <Link href={`/${lang}/guides/${item.slug}`}>{item.name}</Link>
                     ) : (
-                      <VisuallyHidden.Root>{item.name}</VisuallyHidden.Root>
+                      item.name
                     )}
                   </div>
-                  {renderNavigation(item.children, true)}
+                  {item.children && renderNavigation(
+                    item.children.filter(child => 
+                      !(child.type === 'article' && child.slug === item.slug)
+                    ), 
+                    true
+                  )}
                 </li>
               );
             }
-          } else if (item.type === 'category') {
-            return (
-              <li key={item.name}>
-                <div
-                  className={cn(
-                    'font-medium transition-colors',
-                    isActive ? 'text-primary' : 'text-foreground hover:text-primary'
-                  )}
-                >
-                  {item.slug ? (
-                    <Link href={`/${lang}/guides/${item.slug}`}>{item.name}</Link>
-                  ) : (
-                    <VisuallyHidden.Root>{item.name}</VisuallyHidden.Root>
-                  )}
-                </div>
-              </li>
-            );
           } else {
             return (
               <li key={item.name}>

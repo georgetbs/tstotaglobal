@@ -14,31 +14,27 @@ import {
 
 interface LanguageSwitcherProps {
   lang: string;
-  defaultLang: string; // Язык по умолчанию, который не отображается в URL
+  defaultLang: string;
 }
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ lang, defaultLang }) => {
   const pathname = usePathname();
 
   const getPathWithNewLang = (newLang: string) => {
-    // Разбиваем путь на сегменты
     const segments = pathname?.split('/').filter(Boolean) || [];
     
-    // Если новый язык — язык по умолчанию, удаляем языковой сегмент
     if (newLang === defaultLang) {
       if (segments[0] === defaultLang) {
-        segments.shift(); // Убираем первый сегмент, если это язык по умолчанию
+        segments.shift();
       }
     } else {
-      // Если это не язык по умолчанию, заменяем/добавляем языковой сегмент
       if (segments[0] === defaultLang || segments[0]?.length === 2) {
-        segments[0] = newLang; // Заменяем существующий языковой сегмент
+        segments[0] = newLang;
       } else {
-        segments.unshift(newLang); // Добавляем языковой сегмент
+        segments.unshift(newLang);
       }
     }
 
-    // Восстанавливаем путь
     return '/' + segments.join('/');
   };
 
@@ -52,21 +48,25 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ lang, defaul
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={getPathWithNewLang('ka')} className="w-full">
-            <span className="mr-2">🇬🇪</span> ქართული
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link href={getPathWithNewLang('en')} className="w-full">
-            <span className="mr-2">🇬🇧</span> English
+          <Globe className="mr-2 h-4 w-4" /> English
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={getPathWithNewLang('ru')} className="w-full">
-            <span className="mr-2">🇷🇺</span> Русский
-          </Link>
+        <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+          <div className="flex items-center">
+          <Globe className="mr-2 h-4 w-4" /> Русский
+            <span className="ml-2 text-xs text-muted-foreground">(Coming soon)</span>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+          <div className="flex items-center">
+          <Globe className="mr-2 h-4 w-4" /> ქართული
+            <span className="ml-2 text-xs text-muted-foreground">(Coming soon)</span>
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
+
+export default LanguageSwitcher;

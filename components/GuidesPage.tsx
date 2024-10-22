@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useEffect, useState } from 'react';
 import { serialize } from 'next-mdx-remote/serialize';
@@ -11,7 +11,6 @@ import Footer from '@/components/Footer';
 import { Article, NavigationItem } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { PanelLeft } from 'lucide-react';
 import {
@@ -100,85 +99,81 @@ export default function GuidesPage({
   }, [defaultArticle]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <Header lang={lang} />
 
-      <div className="flex-1 overflow-hidden">
-        <div className="mx-auto max-w-7xl flex">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="fixed top-4 left-4 z-50 lg:hidden"
-              >
-                <PanelLeft className="h-6 w-6" /> {/* Using PanelLeft instead of Menu */}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0">
-              <SheetHeader>
-                <SheetTitle>Navigation</SheetTitle>
-                <SheetDescription>Browse the guides</SheetDescription>
-              </SheetHeader>
-              <ArticleNavigation navigationItems={navigationItems} lang={lang} />
-            </SheetContent>
-          </Sheet>
-
-          <div className="hidden lg:block w-80 flex-shrink-0">
+      <div className="mx-auto max-w-7xl flex relative">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="fixed top-4 left-4 z-50 lg:hidden"
+            >
+              <PanelLeft className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-80 p-0">
+            <SheetHeader>
+              <SheetTitle>Navigation</SheetTitle>
+              <SheetDescription>Browse the guides</SheetDescription>
+            </SheetHeader>
             <ArticleNavigation navigationItems={navigationItems} lang={lang} />
-          </div>
+          </SheetContent>
+        </Sheet>
 
-          <main className="flex-grow overflow-hidden flex justify-center">
-            <ScrollArea className="h-[calc(100vh-4rem)] w-full">
-              <div className="py-8 px-4 lg:px-8 max-w-3xl mx-auto">
-                <Card className="shadow-none border-none bg-background">
-                  <CardContent className="p-0">
-                    {defaultArticle && mdxSource ? (
-                      <article>
-                        <CardHeader className="px-0">
-                          <CardTitle className="text-3xl lg:text-4xl font-bold">
-                            {defaultArticle.title}
-                          </CardTitle>
-                          <p className="text-muted-foreground mt-2">
-                            {defaultArticle.description}
-                          </p>
-                          <div className="text-sm text-muted-foreground mt-4 flex items-center space-x-4">
-                            <span>
-                              Created on:{' '}
-                              {new Date(defaultArticle.createdAt).toLocaleDateString()}
-                            </span>
-                            <span>•</span>
-                            <span>{readingTime}</span>
-                          </div>
-                        </CardHeader>
-                        <div className="mt-8">
-                          <ClientSideMDX source={mdxSource} />
-                        </div>
-                      </article>
-                    ) : (
-                      <article>
-                        <CardHeader className="px-0">
-                          <CardTitle className="text-3xl lg:text-4xl font-bold">
-                            {t('guides')}
-                          </CardTitle>
-                        </CardHeader>
-                        <p className="mt-4 text-muted-foreground">{t('chooseArticle')}</p>
-                        <div className="mt-6 space-y-4">
-                          <Skeleton className="h-4 w-[250px]" />
-                          <Skeleton className="h-4 w-[200px]" />
-                          <Skeleton className="h-4 w-[300px]" />
-                        </div>
-                      </article>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </ScrollArea>
-          </main>
+        <div className="hidden lg:block w-80 flex-shrink-0 sticky top-16 h-screen overflow-y-auto">
+          <ArticleNavigation navigationItems={navigationItems} lang={lang} />
+        </div>
 
-          <div className="hidden lg:block w-72 flex-shrink-0">
-            <TableOfContents headings={headings} />
+        <main className="flex-grow flex justify-center px-4 lg:px-8">
+          <div className="w-full max-w-3xl py-8">
+            <Card className="shadow-none border-none bg-background">
+              <CardContent className="p-0">
+                {defaultArticle && mdxSource ? (
+                  <article>
+                    <CardHeader className="px-0">
+                      <CardTitle className="text-3xl lg:text-4xl font-bold">
+                        {defaultArticle.title}
+                      </CardTitle>
+                      <p className="text-muted-foreground mt-2">
+                        {defaultArticle.description}
+                      </p>
+                      <div className="text-sm text-muted-foreground mt-4 flex items-center space-x-4">
+                        <span>
+                          Created on:{' '}
+                          {new Date(defaultArticle.createdAt).toLocaleDateString()}
+                        </span>
+                        <span>•</span>
+                        <span>{readingTime}</span>
+                      </div>
+                    </CardHeader>
+                    <div className="mt-8">
+                      <ClientSideMDX source={mdxSource} />
+                    </div>
+                  </article>
+                ) : (
+                  <article>
+                    <CardHeader className="px-0">
+                      <CardTitle className="text-3xl lg:text-4xl font-bold">
+                        {t('guides')}
+                      </CardTitle>
+                    </CardHeader>
+                    <p className="mt-4 text-muted-foreground">{t('chooseArticle')}</p>
+                    <div className="mt-6 space-y-4">
+                      <Skeleton className="h-4 w-[250px]" />
+                      <Skeleton className="h-4 w-[200px]" />
+                      <Skeleton className="h-4 w-[300px]" />
+                    </div>
+                  </article>
+                )}
+              </CardContent>
+            </Card>
           </div>
+        </main>
+
+        <div className="hidden lg:block w-72 flex-shrink-0 sticky top-16 h-screen overflow-y-auto">
+          <TableOfContents headings={headings} />
         </div>
       </div>
 

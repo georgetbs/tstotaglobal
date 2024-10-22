@@ -26,37 +26,38 @@ const CreateArticlePage: React.FC = () => {
   const [sections, setSections] = useState([{ title: '', content: '' }]);
   const [selectedTab, setSelectedTab] = useState<'write' | 'preview'>('write');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
+  // Инициализация темы и установка mounted
   useEffect(() => {
-    // Check for user's preferred color scheme
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    }
+    setMounted(true);
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(isDark ? 'dark' : 'light');
 
-    // Add listener for changes to color scheme preference
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
       setTheme(e.matches ? 'dark' : 'light');
     };
 
     mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // Применение темы только после монтирования компонента
   useEffect(() => {
-    // Apply theme to body
-    document.body.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+    if (mounted) {
+      document.body.classList.remove('light', 'dark');
+      document.body.classList.add(theme);
+    }
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme(current => current === 'light' ? 'dark' : 'light');
   };
 
+  // Остальной код остается без изменений...
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -122,8 +123,13 @@ const CreateArticlePage: React.FC = () => {
     }
   };
 
+  // Предотвращаем рендеринг до монтирования
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className={`container mx-auto p-4 ${theme}`}>
+ <div className={`container mx-auto p-4 ${theme}`}>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-foreground">Create New Article</h1>
         <Button onClick={toggleTheme} variant="outline" size="icon" className="bg-background text-foreground">
@@ -157,22 +163,17 @@ const CreateArticlePage: React.FC = () => {
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
           <SelectContent className="bg-background">
+            <SelectItem value="introduction">Introduction</SelectItem>
+            <SelectItem value="Next.js">Next.js</SelectItem>
+            <SelectItem value="app-router">App Router</SelectItem>
+            <SelectItem value="tailwind-css">Tailwind CSS and Global Styling</SelectItem>
             <SelectItem value="i18n">i18n</SelectItem>
-            <SelectItem value="icons">Icons</SelectItem>
-            <SelectItem value="supabase">Supabase</SelectItem>
-            <SelectItem value="authentication">Authentication</SelectItem>
-            <SelectItem value="routing">Routing</SelectItem>
-            <SelectItem value="api-routes">API Routes</SelectItem>
-            <SelectItem value="static-generation">Static Generation</SelectItem>
-            <SelectItem value="ssr">Server-Side Rendering</SelectItem>
-            <SelectItem value="dynamic-import">Dynamic Import</SelectItem>
-            <SelectItem value="middleware">Middleware</SelectItem>
-            <SelectItem value="performance">Performance Optimization</SelectItem>
+            <SelectItem value="AI Models">AI Models</SelectItem>
+            <SelectItem value="shadcn">shadcn</SelectItem>
+            <SelectItem value="markdown">Markdown</SelectItem>
             <SelectItem value="deployment">Deployment</SelectItem>
-            <SelectItem value="testing">Testing</SelectItem>
-            <SelectItem value="typescript">TypeScript</SelectItem>
-            <SelectItem value="css-styling">CSS and Styling</SelectItem>
-            <SelectItem value="debugging">Debugging</SelectItem>
+            <SelectItem value="vercel">Vercel</SelectItem>
+            <SelectItem value="code-examples">Examples of code</SelectItem>
           </SelectContent>
         </Select>
         {sections.map((section, index) => (

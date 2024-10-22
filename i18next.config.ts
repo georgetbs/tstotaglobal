@@ -1,14 +1,14 @@
 const i18NextConfig = {
     debug: process.env.NODE_ENV === "development",
     i18n: {
-        locales: ["en", "ka", "ru"],
+        locales: ["en"],
         defaultLocale: "en"
     },
     fallbackNS: "common",
     defaultNS: "common",
     ns: ["common"],
     load: "all",
-    preload: ["en", "ka", "ru"]
+    preload: ["en"]
 }
 
 export const getOptions = (lang: string, ns: string | string[]) => {
