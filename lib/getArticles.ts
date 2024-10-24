@@ -4,27 +4,12 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { slugify } from '@/utils/slugify';
-
-export interface Article {
-  title: string;
-  description: string;
-  category: string;
-  slug: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface NavigationItem {
-  name: string;
-  slug?: string;
-  type: 'category' | 'article';
-  children?: NavigationItem[];
-}
+import { Article, NavigationItem } from '@/types'; // Импортируем интерфейсы из types.ts
 
 const articlesDirectory = path.join(process.cwd(), 'content', 'articles');
 
 export const getNavigationItems = (): NavigationItem[] => {
-  const buildTree = (dirPath: string): NavigationItem[] => {
+  const buildTree = (dirPath: string, parentPath: string[] = []): NavigationItem[] => {
     const items: NavigationItem[] = [];
     const entries = fs.readdirSync(dirPath);
 
@@ -46,13 +31,13 @@ export const getNavigationItems = (): NavigationItem[] => {
             name: data.title || entry,
             slug,
             type: 'category', // It's a category with an article
-            children: buildTree(fullPath), // Continue building the tree
+            children: buildTree(fullPath, [...parentPath, data.title || entry]),
           };
         } else {
           indexArticle = {
             name: entry,
             type: 'category',
-            children: buildTree(fullPath), // Continue building the tree
+            children: buildTree(fullPath, [...parentPath, entry]),
           };
         }
 
@@ -87,7 +72,7 @@ export const getNavigationItems = (): NavigationItem[] => {
 export const getArticles = (): Article[] => {
   const articles: Article[] = [];
 
-  const traverse = (dirPath: string) => {
+  const traverse = (dirPath: string, parentPath: string[] = []) => {
     const entries = fs.readdirSync(dirPath);
 
     entries.forEach((entry) => {
@@ -95,20 +80,23 @@ export const getArticles = (): Article[] => {
       const stats = fs.statSync(fullPath);
 
       if (stats.isDirectory()) {
-        traverse(fullPath);
+        traverse(fullPath, [...parentPath, entry]);
       } else if (stats.isFile() && entry.endsWith('.mdx')) {
         const fileContents = fs.readFileSync(fullPath, 'utf8');
         const { data, content } = matter(fileContents);
         const slug = slugify(data.title || entry.replace('.mdx', ''));
 
-        articles.push({
+        const article: Article = {
           title: data.title || entry.replace('.mdx', ''),
           description: data.description || '',
           category: data.category || '',
           slug,
           content,
           createdAt: data.createdAt || '',
-        });
+          path: [...parentPath, data.title || entry.replace('.mdx', '')], // Заполняем свойство path
+        };
+
+        articles.push(article);
       }
     });
   };

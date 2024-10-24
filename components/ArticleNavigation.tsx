@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { ChevronRight, FileText, Hash } from 'lucide-react';
 
 interface ArticleNavigationProps {
   navigationItems: NavigationItem[];
@@ -35,17 +36,13 @@ const sortCategories = (categories: NavigationItem[]): NavigationItem[] => {
     const indexA = categoryOrder.indexOf(a.name);
     const indexB = categoryOrder.indexOf(b.name);
     
-    // Если обе категории есть в массиве categoryOrder
     if (indexA !== -1 && indexB !== -1) {
       return indexA - indexB;
     }
     
-    // Если только одна из категорий есть в массиве categoryOrder
-    if (indexA !== -1) return -1; // a идет первой
-    if (indexB !== -1) return 1;  // b идет первой
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
     
-    // Если обеих категорий нет в массиве categoryOrder, 
-    // оставляем их в исходном порядке
     return 0;
   });
 };
@@ -66,7 +63,12 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
     if (!items) return null;
 
     return (
-      <ul className={cn('space-y-1', isSubcategory && 'ml-4')}>
+      <ul 
+        className={cn(
+          'space-y-1.5',
+          isSubcategory && 'ml-4 border-l border-border/50 mt-2 pl-2'
+        )}
+      >
         {items.map((item) => {
           const isActive = item.slug ? pathname === `/${lang}/guides/${item.slug}` : false;
           const isArticleCategory = isCategoryArticle(item);
@@ -75,20 +77,39 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
             if (isSubcategory) {
               return (
                 <Accordion type="single" collapsible key={item.name}>
-                  <AccordionItem value={item.name}>
+                  <AccordionItem value={item.name} className="border-none">
                     <AccordionTrigger
                       className={cn(
-                        'hover:no-underline transition-colors',
-                        isActive ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+                        'hover:no-underline transition-all py-2 px-3 rounded-md group',
+                        'text-sm font-medium',
+                        'data-[state=open]:bg-accent/50',
+                        isActive 
+                          ? 'text-blue-500 bg-accent shadow-sm' 
+                          : 'text-foreground hover:bg-accent hover:text-blue-500'
                       )}
                     >
-                      {isArticleCategory || item.slug ? (
-                        <Link href={`/${lang}/guides/${item.slug}`}>{item.name}</Link>
-                      ) : (
-                        item.name
-                      )}
+                      <div className="flex items-center gap-2">
+                        <ChevronRight 
+                          className="h-4 w-4 shrink-0 transition-transform duration-200 
+                          group-data-[state=open]:rotate-90" 
+                        />
+                        {isArticleCategory || item.slug ? (
+                          <Link 
+                            href={`/${lang}/guides/${item.slug}`}
+                            className="flex-1 flex items-center gap-2"
+                          >
+                            <Hash className="h-4 w-4 shrink-0" />
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <div className="flex-1 flex items-center gap-2">
+                            <Hash className="h-4 w-4 shrink-0" />
+                            {item.name}
+                          </div>
+                        )}
+                      </div>
                     </AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionContent className="pt-1 pb-2">
                       {item.children && renderNavigation(
                         item.children.filter(child => 
                           !(child.type === 'article' && child.slug === item.slug)
@@ -104,10 +125,14 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
                 <li key={item.name}>
                   <div
                     className={cn(
-                      'font-medium transition-colors',
-                      isActive ? 'text-primary' : 'text-foreground hover:text-primary'
+                      'py-2 px-3 rounded-md transition-colors',
+                      'text-sm font-medium flex items-center gap-2',
+                      isActive 
+                        ? 'text-blue-500 bg-accent shadow-sm' 
+                        : 'text-foreground hover:bg-accent hover:text-blue-500'
                     )}
                   >
+                    <Hash className="h-4 w-4 shrink-0" />
                     {isArticleCategory || item.slug ? (
                       <Link href={`/${lang}/guides/${item.slug}`}>{item.name}</Link>
                     ) : (
@@ -129,10 +154,14 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
                 <Link
                   href={`/${lang}/guides/${item.slug}`}
                   className={cn(
-                    'block py-1 text-sm transition-colors',
-                    isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
+                    'flex items-center gap-2 py-2 px-3 rounded-md transition-all text-sm',
+                    'hover:bg-accent/50',
+                    isActive 
+                      ? 'text-blue-500 font-medium bg-accent/70' 
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
+                  <FileText className="h-4 w-4 shrink-0" />
                   {item.name}
                 </Link>
               </li>
@@ -146,9 +175,9 @@ export default function ArticleNavigation({ navigationItems, lang }: ArticleNavi
   return (
     <aside className="w-64 h-[calc(100vh-4rem)]">
       <ScrollArea className="h-full">
-        <div className="p-4">
-          <nav>{renderNavigation(sortedNavigationItems)}</nav>
-        </div>
+        <nav className="p-4 space-y-2">
+          {renderNavigation(sortedNavigationItems)}
+        </nav>
       </ScrollArea>
     </aside>
   );

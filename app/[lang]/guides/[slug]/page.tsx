@@ -28,7 +28,8 @@ interface Article {
   content: string;
   createdAt: string;
   slug: string;
-  category: string; // Added category property
+  category: string;
+   // Added category property
 }
 
 interface ProcessedArticle extends Article {
@@ -89,7 +90,7 @@ export default async function ArticlePage({
     followOnX: 'Follow on X',
     about: 'About',
     privacy: 'Privacy',
-    guides: 'Guides',
+    guides: '',
     chooseArticle: 'Choose an article from the navigation'
   };
 

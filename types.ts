@@ -7,6 +7,7 @@ export interface Article {
     slug: string;
     content: string;
     createdAt: string;
+    path?: string[];
   }
   
   export interface NavigationItem {

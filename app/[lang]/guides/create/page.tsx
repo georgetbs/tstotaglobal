@@ -193,7 +193,7 @@ const CreateArticlePage: React.FC = () => {
                 Promise.resolve(
                   <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
-                    className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`}
+                    className={`prose ${theme === 'dark' ? 'prose-invert' : ''}`}
                   >
                     {markdown}
                   </ReactMarkdown>
@@ -233,12 +233,12 @@ const CreateArticlePage: React.FC = () => {
           </Button>
         </div>
       </form>
-      <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} mt-8 max-w-none`}>
+      <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} mt-8`}>
         <h2 className="text-2xl font-bold mb-2 text-foreground">Preview</h2>
         {sections.map((section, index) => (
           <div key={index} className="mb-4">
             <h3 className="text-xl font-semibold text-foreground">{section.title}</h3>
-            <ReactMarkdown className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`} remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown className={`prose ${theme === 'dark' ? 'prose-invert' : ''}`} remarkPlugins={[remarkGfm]}>
               {section.content}
             </ReactMarkdown>
           </div>
